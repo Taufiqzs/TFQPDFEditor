@@ -1,11 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
-from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import collect_data_files, collect_all
 
 block_cipher = None
 
+crypto_datas, crypto_binaries, crypto_hiddenimports = collect_all("cryptography")
+httpx_datas, httpx_binaries, httpx_hiddenimports = collect_all("httpx")
+
 datas = []
 datas += collect_data_files("reportlab")
+datas += crypto_datas
+datas += httpx_datas
 
 # Include the React build output (built before running PyInstaller)
 dist_dir = os.path.join("..", "frontend", "dist")
@@ -14,9 +19,9 @@ datas += [(dist_dir, "dist")]
 a = Analysis(
     ["run.py"],
     pathex=["."],
-    binaries=[],
+    binaries=crypto_binaries + httpx_binaries,
     datas=datas,
-    hiddenimports=[
+    hiddenimports=crypto_hiddenimports + httpx_hiddenimports + [
         "uvicorn.logging",
         "uvicorn.loops",
         "uvicorn.loops.auto",
