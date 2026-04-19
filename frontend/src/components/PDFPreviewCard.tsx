@@ -28,7 +28,7 @@ export default function PDFPreviewCard({ file }: Props) {
         if (!canvas) return
         canvas.width = viewport.width
         canvas.height = viewport.height
-        await page.render({ canvasContext: canvas.getContext('2d')!, viewport }).promise
+        await page.render({ canvasContext: canvas.getContext('2d')!, canvas, viewport }).promise
       } catch {
         setFailed(true)
       }
