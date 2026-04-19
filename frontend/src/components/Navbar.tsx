@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Settings } from 'lucide-react'
 
 const tools = [
   { label: 'Merge PDF', path: '/merge' },
@@ -15,7 +16,7 @@ export default function Navbar() {
         <Link to="/" className="font-bold text-red-500 text-xl tracking-tight shrink-0">
           TFQ<span className="text-gray-800">PDF</span>
         </Link>
-        <div className="flex gap-1 overflow-x-auto">
+        <div className="flex gap-1 overflow-x-auto flex-1">
           {tools.map((t) => (
             <Link
               key={t.path}
@@ -26,6 +27,9 @@ export default function Navbar() {
             </Link>
           ))}
         </div>
+        <Link to="/settings" className="text-gray-400 hover:text-gray-600 transition-colors shrink-0">
+          <Settings size={18} />
+        </Link>
       </div>
     </nav>
   )
