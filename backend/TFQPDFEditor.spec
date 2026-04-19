@@ -1,11 +1,14 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
-from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs
+from PyInstaller.utils.hooks import collect_data_files, collect_all
 
 block_cipher = None
 
+pikepdf_datas, pikepdf_binaries, pikepdf_hiddenimports = collect_all("pikepdf")
+
 datas = []
 datas += collect_data_files("reportlab")
+datas += pikepdf_datas
 
 # Include the React build output (built before running PyInstaller)
 dist_dir = os.path.join("..", "frontend", "dist")
@@ -14,9 +17,9 @@ datas += [(dist_dir, "dist")]
 a = Analysis(
     ["run.py"],
     pathex=["."],
-    binaries=[],
+    binaries=pikepdf_binaries,
     datas=datas,
-    hiddenimports=[
+    hiddenimports=pikepdf_hiddenimports + [
         "uvicorn.logging",
         "uvicorn.loops",
         "uvicorn.loops.auto",
