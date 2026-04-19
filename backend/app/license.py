@@ -1,4 +1,6 @@
+import base64
 import hashlib
+import hmac
 import json
 import os
 import platform
@@ -6,13 +8,9 @@ import sys
 import uuid
 from pathlib import Path
 
-from cryptography.fernet import Fernet
-
 LICENSE_SERVER_URL = "https://tfqpdfeditor-license.fly.dev"
 
-# Stable encryption key — changing this invalidates all existing license files
-_FERNET_KEY = os.environ.get("FERNET_KEY", "").encode()
-_fernet = Fernet(_FERNET_KEY)
+_SECRET = b"TFQPDFEditor2026-machine-lock-key"
 
 
 def get_machine_id() -> str:
@@ -32,10 +30,15 @@ def get_license_path() -> Path:
     return folder / "license.dat"
 
 
+def _sign(payload: str) -> str:
+    return hmac.new(_SECRET, payload.encode(), hashlib.sha256).hexdigest()
+
+
 def save_license(key: str, machine_id: str) -> None:
-    data = json.dumps({"key": key, "machine_id": machine_id}).encode()
-    encrypted = _fernet.encrypt(data)
-    get_license_path().write_bytes(encrypted)
+    payload = json.dumps({"key": key, "machine_id": machine_id})
+    sig = _sign(payload)
+    content = base64.b64encode(f"{payload}|||{sig}".encode()).decode()
+    get_license_path().write_text(content)
 
 
 def load_license() -> dict | None:
@@ -43,8 +46,11 @@ def load_license() -> dict | None:
     if not path.exists():
         return None
     try:
-        decrypted = _fernet.decrypt(path.read_bytes())
-        return json.loads(decrypted)
+        raw = base64.b64decode(path.read_text()).decode()
+        payload, sig = raw.rsplit("|||", 1)
+        if not hmac.compare_digest(_sign(payload), sig):
+            return None
+        return json.loads(payload)
     except Exception:
         return None
 
