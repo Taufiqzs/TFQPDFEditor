@@ -1,0 +1,91 @@
+name: Build Installers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build React frontend
+        working-directory: frontend
+        run: |
+          npm install
+          npm run build
+
+      - name: Install Python dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt pyinstaller
+
+      - name: Package with PyInstaller
+        working-directory: backend
+        run: python -m PyInstaller TFQPDFEditor.spec --noconfirm --clean
+
+      - name: Zip output
+        run: Compress-Archive -Path backend/dist/TFQPDFEditor -DestinationPath TFQPDFEditor-Windows.zip
+        shell: pwsh
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TFQPDFEditor-Windows
+          path: TFQPDFEditor-Windows.zip
+          retention-days: 30
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build React frontend
+        working-directory: frontend
+        run: |
+          npm install
+          npm run build
+
+      - name: Install Python dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt pyinstaller
+
+      - name: Package with PyInstaller
+        working-directory: backend
+        run: python -m PyInstaller TFQPDFEditor.spec --noconfirm --clean
+
+      - name: Create DMG
+        run: |
+          hdiutil create \
+            -volname TFQPDFEditor \
+            -srcfolder backend/dist/TFQPDFEditor.app \
+            -ov -format UDZO \
+            TFQPDFEditor-Mac.dmg
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TFQPDFEditor-Mac
+          path: TFQPDFEditor-Mac.dmg
+          retention-days: 30
