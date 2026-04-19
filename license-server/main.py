@@ -1,10 +1,13 @@
+import secrets
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
+
+ADMIN_TOKEN = "tfq-admin-2026-secret"  # change this to something private
 
 app = FastAPI(title="TFQPDFEditor License Server")
 
@@ -77,6 +80,24 @@ def deactivate(req: DeactivateRequest):
         con.execute("UPDATE licenses SET machine_id = NULL, activated_at = NULL WHERE key = ?", (key,))
     return {"ok": True, "message": "Deactivated. Key can now be used on another machine."}
 
+
+class GenerateRequest(BaseModel):
+    count: int = 1
+
+@app.post("/admin/generate-keys")
+def admin_generate_keys(req: GenerateRequest, x_admin_token: str = Header(...)):
+    if x_admin_token != ADMIN_TOKEN:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    def _make_key():
+        raw = secrets.token_hex(8).upper()
+        return "-".join(raw[i:i+4] for i in range(0, 16, 4))
+    keys = []
+    with _db() as con:
+        for _ in range(req.count):
+            key = _make_key()
+            con.execute("INSERT OR IGNORE INTO licenses (key) VALUES (?)", (key,))
+            keys.append(key)
+    return {"keys": keys}
 
 @app.get("/health")
 def health():
