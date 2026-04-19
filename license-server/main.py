@@ -7,7 +7,8 @@ from pathlib import Path
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 
-ADMIN_TOKEN = "tfq-admin-2026-secret"  # change this to something private
+import os
+ADMIN_TOKEN = os.environ["ADMIN_TOKEN"]
 
 app = FastAPI(title="TFQPDFEditor License Server")
 
