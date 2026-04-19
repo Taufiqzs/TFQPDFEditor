@@ -1,4 +1,6 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import axios from 'axios'
 import Navbar from './components/Navbar'
 import { useAppLifecycle } from './hooks/useAppLifecycle'
 import Home from './pages/Home'
@@ -7,9 +9,31 @@ import SplitPDF from './pages/SplitPDF'
 import CompressPDF from './pages/CompressPDF'
 import PDFToJPG from './pages/PDFToJPG'
 import JPGToPDF from './pages/JPGToPDF'
+import Activation from './pages/Activation'
 
 export default function App() {
   useAppLifecycle()
+  const [activated, setActivated] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    axios.get('/api/license-status')
+      .then(res => setActivated(res.data.activated))
+      .catch(() => setActivated(false))
+  }, [])
+
+  if (activated === null) return null // brief loading before license check resolves
+
+  if (!activated) {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/activate" element={<Activation />} />
+          <Route path="*" element={<Navigate to="/activate" replace />} />
+        </Routes>
+      </BrowserRouter>
+    )
+  }
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50 flex flex-col">

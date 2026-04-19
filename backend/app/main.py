@@ -9,10 +9,13 @@ mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 mimetypes.add_type("image/svg+xml", ".svg")
 
+import httpx
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 from app.routers import merge, split, compress, pdf_to_jpg, jpg_to_pdf
+from app.license import LICENSE_SERVER_URL, get_machine_id, is_activated, save_license
 
 app = FastAPI(title="TFQPDFEditor API")
 
@@ -45,6 +48,30 @@ async def heartbeat():
 async def shutdown():
     threading.Thread(target=lambda: (time.sleep(0.3), os._exit(0)), daemon=True).start()
     return Response(status_code=204)
+
+# --- License endpoints ---
+class ActivateRequest(BaseModel):
+    key: str
+
+@app.get("/api/license-status")
+async def license_status():
+    return {"activated": is_activated()}
+
+@app.post("/api/activate")
+async def activate(req: ActivateRequest):
+    machine_id = get_machine_id()
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            res = await client.post(
+                f"{LICENSE_SERVER_URL}/activate",
+                json={"key": req.key, "machine_id": machine_id},
+            )
+            data = res.json()
+    except Exception:
+        return {"ok": False, "message": "Could not reach license server. Check your internet connection."}
+    if data.get("ok"):
+        save_license(req.key, machine_id)
+    return data
 
 # --- Routers ---
 app.include_router(merge.router, prefix="/api")
