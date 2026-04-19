@@ -55,7 +55,7 @@ Convert one or more images into a single PDF document.
 | Desktop packaging | PyInstaller |
 | CI/CD | GitHub Actions (builds Windows `.exe` and macOS `.app`) |
 
----
+|---|---|
 
 ## Running Locally
 
