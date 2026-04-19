@@ -4,12 +4,10 @@ from PyInstaller.utils.hooks import collect_data_files, collect_all
 
 block_cipher = None
 
-crypto_datas, crypto_binaries, crypto_hiddenimports = collect_all("cryptography")
 httpx_datas, httpx_binaries, httpx_hiddenimports = collect_all("httpx")
 
 datas = []
 datas += collect_data_files("reportlab")
-datas += crypto_datas
 datas += httpx_datas
 
 # Include the React build output (built before running PyInstaller)
@@ -19,9 +17,9 @@ datas += [(dist_dir, "dist")]
 a = Analysis(
     ["run.py"],
     pathex=["."],
-    binaries=crypto_binaries + httpx_binaries,
+    binaries=httpx_binaries,
     datas=datas,
-    hiddenimports=crypto_hiddenimports + httpx_hiddenimports + [
+    hiddenimports=httpx_hiddenimports + [
         "uvicorn.logging",
         "uvicorn.loops",
         "uvicorn.loops.auto",
@@ -40,9 +38,6 @@ a = Analysis(
         "app.routers.pdf_to_jpg",
         "app.routers.jpg_to_pdf",
         "app.license",
-        "cryptography",
-        "cryptography.fernet",
-        "cryptography.hazmat.primitives.ciphers.aead",
         "httpx",
     ],
     hookspath=[],
