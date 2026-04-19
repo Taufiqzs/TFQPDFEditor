@@ -5,7 +5,9 @@ from PyInstaller.utils.hooks import collect_data_files, collect_all
 block_cipher = None
 
 httpx_datas, httpx_binaries, httpx_hiddenimports = collect_all("httpx")
+from PyInstaller.utils.hooks import collect_submodules
 pdfium_datas, pdfium_binaries, pdfium_hiddenimports = collect_all("pypdfium2")
+pdfium_hiddenimports += collect_submodules("pypdfium2")
 
 datas = []
 datas += collect_data_files("reportlab")
