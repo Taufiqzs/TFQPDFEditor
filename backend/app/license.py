@@ -8,7 +8,7 @@ from pathlib import Path
 
 from cryptography.fernet import Fernet
 
-LICENSE_SERVER_URL = "https://tfqpdfeditor-license.onrender.com"
+LICENSE_SERVER_URL = "https://tfqpdfeditor-license.fly.dev"
 
 # Stable encryption key — changing this invalidates all existing license files
 _FERNET_KEY = os.environ.get("FERNET_KEY", "").encode()
