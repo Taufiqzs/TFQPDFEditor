@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Scissors, Download } from 'lucide-react'
 import DropZone from '../components/DropZone'
+import PDFPreviewCard from '../components/PDFPreviewCard'
 import { usePdfTool } from '../hooks/usePdfTool'
 
 export default function SplitPDF() {
@@ -20,21 +21,26 @@ export default function SplitPDF() {
       {!downloadUrl ? (
         <>
           <DropZone onDrop={(f) => setFiles([f[0]])} accept={{ 'application/pdf': ['.pdf'] }} />
+
           {files.length > 0 && (
-            <div className="mt-4 bg-white border rounded-xl p-4 space-y-3">
-              <p className="text-sm font-medium text-gray-700">Selected: {files[0].name}</p>
-              <label className="block text-sm text-gray-600">
-                Pages to extract <span className="text-gray-400">(e.g. 1,3,5-8 — leave blank for all)</span>
-              </label>
-              <input
-                type="text"
-                value={pages}
-                onChange={(e) => setPages(e.target.value)}
-                placeholder="1,3,5-8"
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
-              />
+            <div className="mt-4 flex gap-4 items-start">
+              <PDFPreviewCard file={files[0]} />
+              <div className="flex-1 bg-white border rounded-xl p-4 space-y-3">
+                <p className="text-sm font-medium text-gray-700">{files[0].name}</p>
+                <label className="block text-sm text-gray-600">
+                  Pages to extract <span className="text-gray-400">(e.g. 1,3,5-8 — leave blank for all)</span>
+                </label>
+                <input
+                  type="text"
+                  value={pages}
+                  onChange={(e) => setPages(e.target.value)}
+                  placeholder="1,3,5-8"
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+              </div>
             </div>
           )}
+
           {error && <p className="text-red-500 text-sm mt-3">{error}</p>}
           <button
             onClick={() => process({ pages })}

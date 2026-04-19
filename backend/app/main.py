@@ -1,12 +1,15 @@
 import mimetypes
 import os
 import sys
-from fastapi import FastAPI
+import threading
+import time
 
 # Fix Windows registry mapping .js/.css to wrong MIME types
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 mimetypes.add_type("image/svg+xml", ".svg")
+
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.routers import merge, split, compress, pdf_to_jpg, jpg_to_pdf
@@ -20,13 +23,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- Heartbeat watchdog ---
+_last_beat = time.time()
+_TIMEOUT = 20  # seconds without a heartbeat before shutdown
+
+def _watchdog():
+    while True:
+        time.sleep(5)
+        if time.time() - _last_beat > _TIMEOUT:
+            os._exit(0)
+
+threading.Thread(target=_watchdog, daemon=True).start()
+
+@app.post("/api/heartbeat")
+async def heartbeat():
+    global _last_beat
+    _last_beat = time.time()
+    return {"ok": True}
+
+@app.post("/api/shutdown")
+async def shutdown():
+    threading.Thread(target=lambda: (time.sleep(0.3), os._exit(0)), daemon=True).start()
+    return Response(status_code=204)
+
+# --- Routers ---
 app.include_router(merge.router, prefix="/api")
 app.include_router(split.router, prefix="/api")
 app.include_router(compress.router, prefix="/api")
 app.include_router(pdf_to_jpg.router, prefix="/api")
 app.include_router(jpg_to_pdf.router, prefix="/api")
 
-# Serve React build — works both in dev (if dist/ exists) and in PyInstaller bundle
+# --- Serve React build ---
 if getattr(sys, "frozen", False):
     _base = sys._MEIPASS  # type: ignore[attr-defined]
 else:

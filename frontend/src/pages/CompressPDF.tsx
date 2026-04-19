@@ -1,5 +1,6 @@
 import { Minimize2, Download } from 'lucide-react'
 import DropZone from '../components/DropZone'
+import PDFPreviewCard from '../components/PDFPreviewCard'
 import { usePdfTool } from '../hooks/usePdfTool'
 
 export default function CompressPDF() {
@@ -18,9 +19,17 @@ export default function CompressPDF() {
       {!downloadUrl ? (
         <>
           <DropZone onDrop={(f) => setFiles([f[0]])} accept={{ 'application/pdf': ['.pdf'] }} />
+
           {files.length > 0 && (
-            <p className="mt-3 text-sm text-gray-600 text-center">Selected: <strong>{files[0].name}</strong> ({(files[0].size / 1024).toFixed(1)} KB)</p>
+            <div className="mt-4 flex gap-4 items-center">
+              <PDFPreviewCard file={files[0]} />
+              <div className="text-sm text-gray-600">
+                <p className="font-medium text-gray-800">{files[0].name}</p>
+                <p className="text-gray-400 mt-1">{(files[0].size / 1024).toFixed(1)} KB</p>
+              </div>
+            </div>
           )}
+
           {error && <p className="text-red-500 text-sm mt-3">{error}</p>}
           <button
             onClick={() => process()}

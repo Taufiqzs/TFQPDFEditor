@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import { useAppLifecycle } from './hooks/useAppLifecycle'
 import Home from './pages/Home'
 import MergePDF from './pages/MergePDF'
 import SplitPDF from './pages/SplitPDF'
@@ -8,6 +9,7 @@ import PDFToJPG from './pages/PDFToJPG'
 import JPGToPDF from './pages/JPGToPDF'
 
 export default function App() {
+  useAppLifecycle()
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50 flex flex-col">
