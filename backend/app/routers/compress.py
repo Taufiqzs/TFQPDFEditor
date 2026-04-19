@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
 from pypdf import PdfWriter, PdfReader
-import io, fitz
+import io, pikepdf
 
 router = APIRouter()
 
@@ -11,8 +11,14 @@ async def compress_pdf(files: list[UploadFile] = File(...), level: str = Form("r
     buf = io.BytesIO()
 
     if level == "extreme":
-        doc = fitz.open(stream=data, filetype="pdf")
-        doc.save(buf, garbage=4, deflate=True, deflate_images=True, deflate_fonts=True, clean=True)
+        pdf = pikepdf.open(io.BytesIO(data))
+        pdf.save(
+            buf,
+            compress_streams=True,
+            recompress_flate=True,
+            object_stream_mode=pikepdf.ObjectStreamMode.generate,
+            stream_decode_level=pikepdf.StreamDecodeLevel.generalized,
+        )
     elif level == "low":
         reader = PdfReader(io.BytesIO(data))
         writer = PdfWriter()

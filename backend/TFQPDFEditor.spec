@@ -4,9 +4,7 @@ from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs
 
 block_cipher = None
 
-# Collect data files from pymupdf and other packages
 datas = []
-datas += collect_data_files("fitz")
 datas += collect_data_files("reportlab")
 
 # Include the React build output (built before running PyInstaller)
@@ -16,7 +14,7 @@ datas += [(dist_dir, "dist")]
 a = Analysis(
     ["run.py"],
     pathex=["."],
-    binaries=collect_dynamic_libs("fitz"),
+    binaries=[],
     datas=datas,
     hiddenimports=[
         "uvicorn.logging",
