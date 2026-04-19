@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from app.routers import merge, split, compress, pdf_to_jpg, jpg_to_pdf
-from app.license import LICENSE_SERVER_URL, get_machine_id, is_activated, save_license
+from app.license import LICENSE_SERVER_URL, get_machine_id, get_license_path, is_activated, load_license, save_license
 
 app = FastAPI(title="TFQPDFEditor API")
 
@@ -71,6 +71,25 @@ async def activate(req: ActivateRequest):
         return {"ok": False, "message": "Could not reach license server. Check your internet connection."}
     if data.get("ok"):
         save_license(req.key, machine_id)
+    return data
+
+@app.post("/api/deactivate")
+async def deactivate():
+    lic = load_license()
+    if not lic:
+        return {"ok": False, "message": "No active license found."}
+    machine_id = get_machine_id()
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            res = await client.post(
+                f"{LICENSE_SERVER_URL}/deactivate",
+                json={"key": lic["key"], "machine_id": machine_id},
+            )
+            data = res.json()
+    except Exception:
+        return {"ok": False, "message": "Could not reach license server."}
+    if data.get("ok"):
+        get_license_path().unlink(missing_ok=True)
     return data
 
 # --- Routers ---

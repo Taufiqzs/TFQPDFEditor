@@ -12,7 +12,7 @@ ADMIN_TOKEN = os.environ["ADMIN_TOKEN"]
 
 app = FastAPI(title="TFQPDFEditor License Server")
 
-DB_PATH = Path(__file__).parent / "licenses.db"
+DB_PATH = Path(os.environ.get("DB_PATH", "/data/licenses.db"))
 
 
 def init_db():

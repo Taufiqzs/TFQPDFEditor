@@ -10,6 +10,7 @@ import CompressPDF from './pages/CompressPDF'
 import PDFToJPG from './pages/PDFToJPG'
 import JPGToPDF from './pages/JPGToPDF'
 import Activation from './pages/Activation'
+import Settings from './pages/Settings'
 
 export default function App() {
   useAppLifecycle()
@@ -46,6 +47,7 @@ export default function App() {
             <Route path="/compress" element={<CompressPDF />} />
             <Route path="/pdf-to-jpg" element={<PDFToJPG />} />
             <Route path="/jpg-to-pdf" element={<JPGToPDF />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>
         <footer className="text-center text-sm text-gray-400 py-6 border-t">
