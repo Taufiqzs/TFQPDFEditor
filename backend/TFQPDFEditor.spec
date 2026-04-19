@@ -5,10 +5,12 @@ from PyInstaller.utils.hooks import collect_data_files, collect_all
 block_cipher = None
 
 httpx_datas, httpx_binaries, httpx_hiddenimports = collect_all("httpx")
+pdfium_datas, pdfium_binaries, pdfium_hiddenimports = collect_all("pypdfium2")
 
 datas = []
 datas += collect_data_files("reportlab")
 datas += httpx_datas
+datas += pdfium_datas
 
 # Include the React build output (built before running PyInstaller)
 dist_dir = os.path.join("..", "frontend", "dist")
@@ -17,9 +19,9 @@ datas += [(dist_dir, "dist")]
 a = Analysis(
     ["run.py"],
     pathex=["."],
-    binaries=httpx_binaries,
+    binaries=httpx_binaries + pdfium_binaries,
     datas=datas,
-    hiddenimports=httpx_hiddenimports + [
+    hiddenimports=httpx_hiddenimports + pdfium_hiddenimports + [
         "uvicorn.logging",
         "uvicorn.loops",
         "uvicorn.loops.auto",
