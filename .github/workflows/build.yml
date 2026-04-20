@@ -46,6 +46,15 @@ jobs:
           path: TFQPDFEditor-Windows.zip
           retention-days: 30
 
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: latest
+          name: TFQPDFEditor Latest
+          files: TFQPDFEditor-Windows.zip
+          make_latest: true
+
   build-macos:
     runs-on: macos-latest
     steps:
@@ -89,3 +98,12 @@ jobs:
           name: TFQPDFEditor-Mac
           path: TFQPDFEditor-Mac.dmg
           retention-days: 30
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: latest
+          name: TFQPDFEditor Latest
+          files: TFQPDFEditor-Mac.dmg
+          make_latest: true
