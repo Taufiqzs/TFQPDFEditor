@@ -51,7 +51,7 @@ export default function App() {
           </Routes>
         </main>
         <footer className="text-center text-sm text-gray-400 py-6 border-t">
-          © 2026 TFQPDFEditor — All tools are free
+          © 2026 TFQPDFEditor
         </footer>
       </div>
     </BrowserRouter>
